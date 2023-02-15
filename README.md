@@ -31,6 +31,10 @@ npmMigrateAll(from, to, pkgs).then(({
 ```bash
 npx npm-migrate-all --from=https://registry.npmjs.org/ --to=http://localhost:4873/ pkg1 @my/pkg2 pkg3@0.1.0
 ```
+OR in development:
+```bash
+npm start -- --from=https://registry.npmjs.org/ --to=http://localhost:4873/ pkg1 @my/pkg2 pkg3@0.1.0
+```
 
 If you'd like to adjust concurreny limit, set environment variable `META_RATE_LIMIT`, `PACKAGE_RATE_LIMIT`, `VERSION_RATE_LIMIT` to the value as you wish.
 
