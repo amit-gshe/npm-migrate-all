@@ -1,4 +1,3 @@
-import axios from 'axios'
 import 'zx/globals'
 import pLimit from 'p-limit'
 import MultiProgress from 'multi-progress'
@@ -184,6 +183,16 @@ const npmMigrateAll = async (from: string, to: string, pkgs: string[]): Promise<
     await streamToPromise(wStream)
   }
 
+  const downloadPackage = async (id: string, from: string, dir: string) => {
+    await $ `npm pack ${id} --pack-destination ${dir} --registry ${from}`;
+    let fileName = id;
+    if (fileName.startsWith("@")) {
+      fileName = fileName.replace("@", "").replace("/", "-");
+    }
+    fileName = fileName.replace("@", "-") + ".tgz"
+    return fs.readFileSync((path.join(dir, fileName)))
+  }
+
   const syncOne = async (
     pkg: PackageSummary,
     version: string,
@@ -199,12 +208,7 @@ const npmMigrateAll = async (from: string, to: string, pkgs: string[]): Promise<
       try {
         const metadata = await inspect(pkg.name, version, from)
         const tarballUrl = metadata.dist.tarball
-        const tarballData = (await axios.get(
-          tarballUrl,
-          {
-            responseType: 'arraybuffer'
-          }
-        )).data
+        const tarballData = await downloadPackage(metadata._id, from, tempDir)
         const basename = path.basename(tarballUrl)
         const pkgDir = path.join(tempDir, pkg.name)
         const destFilename = path.join(pkgDir, basename)
